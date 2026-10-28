@@ -1,6 +1,6 @@
 ---
 name: project-companion
-description: Keeps a plain-language, evidence-backed log of what Claude Code actually did on a project and why, written as markdown files the user reads directly — no separate app, dashboard, or database needed. Use this whenever a coding turn just finished real work (files changed, commands run, tests run) in a project that has a .claude/companion/ folder, or when the user asks things like "방금 뭐 바꾼거야", "왜 이렇게 했어", "지금까지 뭐 했어", "what did you just change and why", "can you explain that in simpler terms", "keep track of this for me", or asks to turn on / set up progress tracking for a project. This skill IS the review surface — always prefer writing/reading the companion log over just answering from memory when the question is about past work, especially work from an earlier session. Trigger proactively even when the user doesn't name "companion" or "log" explicitly.
+description: Keeps a plain-language, evidence-backed log of what Claude Code actually did on a project and why, written as markdown files the user reads directly — no separate app, dashboard, or database needed. Use this whenever a coding turn just finished real work (files changed, commands run, tests run) in a project that has a .claude/companion/ folder, or when the user asks things like "what did you just change and why", "why did you do it that way", "what have you done so far", "can you explain that in simpler terms", "keep track of this for me", or asks to turn on / set up progress tracking for a project (in any language — e.g. "방금 뭐 바꾼거야", "왜 이렇게 했어", "지금까지 뭐 했어"). This skill IS the review surface — always prefer writing/reading the companion log over just answering from memory when the question is about past work, especially work from an earlier session. Trigger proactively even when the user doesn't name "companion" or "log" explicitly.
 ---
 
 # Project Companion
@@ -13,8 +13,12 @@ This replaces building a separate dashboard/database for the same purpose. The m
 
 Two hard rules carry over from everything this approach is meant to fix:
 
-1. **Evidence, not vibes.** Only write that something is verified if you actually ran it and are quoting the real output. If you didn't run it, say so plainly — "이건 실행해서 확인하지 않았습니다" is a completely fine thing to write. A confident-sounding claim that turns out to be wrong is worse than an honest "모르겠음."
+1. **Evidence, not vibes.** Only write that something is verified if you actually ran it and are quoting the real output. If you didn't run it, say so plainly — "I didn't actually run this to confirm" is a completely fine thing to write. A confident-sounding claim that turns out to be wrong is worse than an honest "not sure."
 2. **Match the reader, not the code.** Avoid unexplained jargon. When a technical term is genuinely necessary, explain it in one short clause right where it's used, calibrated to the project's `PROFILE.md` (see below).
+
+## Language
+
+Write everything this skill produces — profile questions, log entries, section headers, index lines — in the same language the user is actually using with you (match their most recent messages). If the project's `PROFILE.md` was written in a particular language, keep using that language for this project's entries unless the user switches. If the language is unclear or mixed, default to English. Section headers are not fixed strings to copy verbatim — translate them naturally (e.g. "What I did" / "무엇을 했는지" / "¿Qué hice?") so the log reads as if written by a native speaker, not a translated template.
 
 ## Step 0: is there a companion set up for this project?
 
@@ -26,16 +30,16 @@ Check for `.claude/companion/` in the project root (relative to the repo you're 
 
 ## Step 1: read the profile (first time, or if you haven't this session)
 
-Read `.claude/companion/PROFILE.md`. It's a short, plain-prose note describing who's reading these logs — their technical background, how much detail they want, any terms they've said to avoid or always explain. Let it set your tone and depth for every entry in this project.
+Read `.claude/companion/PROFILE.md`. It's a short, plain-prose note describing who's reading these logs — their technical background, how much detail they want, any terms they've said to avoid or always explain. Let it set your tone, depth, and language for every entry in this project.
 
 If the folder exists but `PROFILE.md` doesn't, ask the user 2-3 short questions before writing your first entry. Ask about **this project specifically**, not just coding in general — someone can be a strong programmer and still be new to what *this* project actually does (its domain, its purpose), or the reverse, and either gap changes what needs explaining:
-- 이 프로젝트가 정확히 뭘 하는 건지, 그리고 코드를 평소에 얼마나 다뤄보셨는지 — 둘 다 자유롭게 말씀해주세요. (한쪽만 알아도 괜찮습니다. 예: 코드는 잘 몰라도 이 프로젝트가 왜 필요한지는 잘 아는 경우도 있으니까요.)
-- 설명은 짧게 요점만 vs 꼼꼼하게 풀어서, 어느 쪽이 편하신가요?
-- 피해줬으면 하는 용어나, 반대로 익숙한 용어가 있나요?
+- How much do you know about what this project actually does, and separately, how much coding experience do you have in general? (Either answer alone is fine — e.g. someone might not know code well but understand exactly why this project exists.)
+- Do you prefer short, to-the-point explanations, or more thorough ones?
+- Any terms you'd like avoided, or conversely terms you're already comfortable with?
 
-Write down both axes separately in `PROFILE.md` — general coding familiarity AND familiarity with this project's own domain/purpose — since an entry might need to explain a coding concept, a domain concept, both, or neither, depending on what the task touched.
+Write the answers as plain prose (not a form) into `PROFILE.md`, in the language the user answered in. Record both axes separately — general coding familiarity AND familiarity with this project's own domain/purpose — since an entry might need to explain a coding concept, a domain concept, both, or neither, depending on what the task touched.
 
-Write the answers as plain prose (not a form) into `PROFILE.md`. If you're in a context where you can't ask (e.g., invoked automatically mid-turn with no way to prompt), default to writing for a smart person with no coding background, and leave a one-line note in that day's entry that the profile still needs setting up.
+If you're in a context where you can't ask (e.g., invoked automatically mid-turn with no way to prompt), default to writing for a smart person with no coding background, in whatever language the surrounding conversation is in, and leave a one-line note in that day's entry that the profile still needs setting up.
 
 ## Step 2: decide whether this turn deserves a log entry
 
@@ -45,35 +49,35 @@ If a Stop hook or other system message explicitly tells you to log the current t
 
 ## Step 3: write the entry
 
-File path: `.claude/companion/log/<YYYY-MM-DD>-<HHMMSS>-<short-slug>.md`, using the current date/time and a short kebab-case slug of what the task was about (e.g. `2026-10-27-143012-add-auto-explain-automation.md`).
+File path: `.claude/companion/log/<YYYY-MM-DD>-<HHMMSS>-<short-slug>.md`, using the current date/time and a short kebab-case slug of what the task was about (e.g. `2026-10-27-143012-add-auto-explain-automation.md`). The slug can stay in English/ASCII even when the entry's prose is in another language — it's just a filename.
 
-Use this structure — keep every section, but the length of each should match what actually happened (a one-line fix doesn't need five paragraphs):
+Use this structure — keep every section, but the length of each should match what actually happened (a one-line fix doesn't need five paragraphs), and write the headers themselves in the project's language, not literally as shown here:
 
 ```markdown
-# <한 줄 제목>
+# <one-line title>
 
-- 시각: <ISO 8601 타임스탬프>
-- 어떤 요청으로 시작됐는지: <사용자가 실제로 뭘 요청했는지, 한두 줄>
+- Time: <ISO 8601 timestamp>
+- What was asked: <what the user actually requested, one or two lines>
 
-## 무엇을 했는지
-<바뀐 파일/만든 파일/실행한 커맨드를 사람이 이해할 수 있는 말로. 파일 경로는 적어도 되지만, 그 파일이 "뭘 하는 부분인지"를 같이 설명>
+## What I did
+<the files changed/created, commands run, described in terms a person can follow. File paths are fine to mention, but explain what that file's role actually is>
 
-## 왜 이렇게 했는지
-<이 방법을 고른 이유, 고려했던 다른 방법과 버린 이유 (있다면)>
+## Why I did it this way
+<why this approach, and what alternatives were considered and rejected, if any>
 
-## 실제로 어떻게 확인했는지 (증거)
-<진짜로 실행한 커맨드/테스트의 실제 출력을 그대로 인용. "테스트를 통과했습니다" 같은 요약이 아니라 진짜 출력 일부를 붙여넣기>
+## How I actually checked this (evidence)
+<paste the real output of commands/tests you actually ran — not a summary like "tests passed", but the real output itself>
 
-## 아직 확실하지 않은 것
-<직접 실행/확인하지 못한 부분, 사용자가 실제로 써보기 전엔 모르는 부분을 솔직하게. 없으면 "특별히 없음"이라고 명시>
+## What I'm still not sure about
+<anything you didn't verify directly, or that the user won't know for sure until they try it themselves. If genuinely nothing, say so explicitly rather than omitting the section>
 ```
 
 ### When the change is big or touches many files
 
 A one-line fix is easy to narrate. A change spanning several files isn't automatically harder to explain — but it is if you just list every file. Instead:
 
-- Open `무엇을 했는지` with one or two plain sentences on the overall effect — what can the reader now do, or what's now true, that wasn't before — before any file-level detail. That sentence is what most readers actually need; the rest is for whoever wants to go deeper.
-- Group files by the role they played (e.g. "화면에 보이는 부분", "저장하는 부분", "그 둘을 연결하는 부분") rather than listing paths in isolation. A reader with no coding background can follow "이 세 파일은 같이 묶어서 하나의 버튼을 만들었습니다" far more easily than three unrelated-looking bullet points.
+- Open "What I did" with one or two plain sentences on the overall effect — what can the reader now do, or what's now true, that wasn't before — before any file-level detail. That sentence is what most readers actually need; the rest is for whoever wants to go deeper.
+- Group files by the role they played (e.g. "the part the user sees", "the part that saves things", "the part that connects the two") rather than listing paths in isolation. A reader with no coding background can follow "these three files together build one button" far more easily than three unrelated-looking bullet points.
 - If more than ~5-6 files changed, summarize the categories and call out only the one or two files that matter most for understanding *why*, rather than enumerating all of them with equal weight.
 - The same applies to evidence: paste the output that actually demonstrates the result (e.g. the final test run), not every intermediate command you happened to run while getting there.
 
@@ -82,14 +86,14 @@ A one-line fix is easy to narrate. A change spanning several files isn't automat
 `.claude/companion/log/INDEX.md` is a running list, newest entry first. After writing an entry, prepend one line:
 
 ```markdown
-- <YYYY-MM-DD HH:MM> [<한 줄 요약>](<entry-filename>.md)
+- <YYYY-MM-DD HH:MM> [<one-line summary>](<entry-filename>.md)
 ```
 
 Create the file with just that one line if it doesn't exist yet. Don't rewrite or reorder older lines.
 
 ## Answering questions about past work
 
-When asked things like "지금까지 뭐 했어", "왜 이렇게 했어", "이게 뭐하는 부분이야" — if the answer concerns work from this session, you likely already know it directly. But if it concerns an earlier session, or you want to give a grounded answer instead of relying on memory, **read `INDEX.md` and the relevant entry file(s) and answer from those** rather than reconstructing from scratch — the log is the source of truth across sessions, and the user may be about to make a decision based on your answer.
+When asked things like "what have you done so far", "why did you do it that way", "what does this part do" — if the answer concerns work from this session, you likely already know it directly. But if it concerns an earlier session, or you want to give a grounded answer instead of relying on memory, **read `INDEX.md` and the relevant entry file(s) and answer from those** rather than reconstructing from scratch — the log is the source of truth across sessions, and the user may be about to make a decision based on your answer.
 
 ## Setting up a new project
 

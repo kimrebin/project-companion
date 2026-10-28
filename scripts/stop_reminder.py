@@ -33,10 +33,11 @@ def main():
         return
 
     reason = (
-        "이 프로젝트는 project-companion 스킬이 켜져 있습니다. 방금 턴에서 실제로 파일을 "
-        "바꾸거나 커맨드/테스트를 실행했다면, project-companion 스킬(SKILL.md)의 지침대로 "
-        "`.claude/companion/log/`에 기록을 남기고 `INDEX.md`를 갱신하세요. 순수 질문/설명만 "
-        "한 턴이었다면 아무것도 하지 말고 그대로 끝내세요."
+        "This project has the project-companion skill turned on. If this turn actually "
+        "changed files or ran commands/tests, follow the project-companion skill (SKILL.md) "
+        "to write an entry under `.claude/companion/log/` and update `INDEX.md` — in the "
+        "language you've been using with the user. If this turn was pure Q&A/explanation "
+        "with no real change, do nothing and just end normally."
     )
     try:
         print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))
