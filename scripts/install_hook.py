@@ -22,8 +22,8 @@ def main():
         try:
             settings = json.loads(settings_path.read_text(encoding="utf-8"))
         except Exception as e:
-            print(f"기존 설정 파일을 읽는 데 실패했습니다 ({settings_path}): {e}")
-            print("JSON 문법이 깨져 있을 수 있습니다. 직접 확인해 주세요.")
+            print(f"Could not read existing settings file ({settings_path}): {e}")
+            print("It may have invalid JSON — please check it manually.")
             sys.exit(1)
     else:
         settings = {}
@@ -52,10 +52,11 @@ def main():
     settings_path.write_text(
         json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    print(f"완료: {settings_path} 에 project-companion Stop 훅을 등록했습니다.")
-    print("Claude Code를 쓰는 모든 프로젝트에 적용되지만, 실제로 .claude/companion/")
-    print("폴더가 있는 프로젝트에서만 동작합니다. 이미 실행 중인 Claude Code 세션이")
-    print("있다면 한 번 재시작하거나 /hooks 메뉴를 열어 설정을 다시 불러오세요.")
+    print(f"Done: registered the project-companion Stop hook in {settings_path}")
+    print("It applies across every project you use Claude Code in, but only does")
+    print("anything in projects that actually have a .claude/companion/ folder.")
+    print("If you have a Claude Code session already running, restart it or open")
+    print("the /hooks menu once to reload settings.")
 
 
 if __name__ == "__main__":
